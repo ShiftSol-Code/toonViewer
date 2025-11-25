@@ -1,0 +1,226 @@
+:root {
+    --app-width: 390px;
+    /* iPhone 14 width */
+    --app-height: 844px;
+    /* iPhone 14 height */
+    --header-height: 50px;
+    --bg-color: #121212;
+    --app-bg: #ffffff;
+    --text-color: #333;
+    --accent-color: #00dc64;
+    /* Naver Webtoon Green-ish */
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    background-color: var(--bg-color);
+    font-family: 'Noto Sans KR', sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    color: var(--text-color);
+}
+
+#app-container {
+    width: 100%;
+    max-width: var(--app-width);
+    height: 100vh;
+    max-height: var(--app-height);
+    /* Simulate device height on desktop */
+    background-color: var(--app-bg);
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+}
+
+/* Mobile override: Full screen on actual mobile devices */
+@media (max-width: 450px) {
+    #app-container {
+        max-height: 100vh;
+        box-shadow: none;
+    }
+
+    body {
+        background-color: var(--app-bg);
+    }
+}
+
+#viewer-header {
+    height: var(--header-height);
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(5px);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 16px;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 100;
+    border-bottom: 1px solid #eee;
+    transition: transform 0.3s ease;
+}
+
+#viewer-header.hidden {
+    transform: translateY(-100%);
+}
+
+#episode-title {
+    font-size: 16px;
+    font-weight: 700;
+}
+
+button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px;
+    color: #333;
+}
+
+#viewer-content {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+    /* Smooth scrolling on iOS */
+}
+
+/* Hide scrollbar for cleaner look */
+#viewer-content::-webkit-scrollbar {
+    display: none;
+}
+
+#viewer-content {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+.webtoon-image {
+    width: 100%;
+    display: block;
+    /* Prevent layout shifts */
+    min-height: 200px;
+    background-color: #f0f0f0;
+}
+
+.loading-spinner {
+    text-align: center;
+    padding: 20px;
+    color: #888;
+}
+
+#viewer-controls {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 20px;
+    display: flex;
+    justify-content: space-between;
+    background: linear-gradient(to top, rgba(255, 255, 255, 1) 0%, rgba(255, 255, 255, 0) 100%);
+    z-index: 100;
+    transform: translateY(100%);
+    transition: transform 0.3s ease;
+}
+
+#viewer-controls.visible {
+    transform: translateY(0);
+}
+
+.nav-btn {
+    background-color: #333;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: bold;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+
+/* Intro Page Styles */
+.intro-container {
+    background-color: #f8f9fa;
+}
+
+#intro-header {
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: white;
+    border-bottom: 1px solid #eee;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+#intro-header h1 {
+    font-size: 20px;
+    font-weight: 900;
+    color: var(--accent-color);
+}
+
+#intro-content {
+    padding: 16px;
+    overflow-y: auto;
+}
+
+.webtoon-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    /* 2 columns */
+    gap: 16px;
+}
+
+.webtoon-card {
+    text-decoration: none;
+    color: inherit;
+    display: flex;
+    flex-direction: column;
+}
+
+.thumbnail-container {
+    width: 100%;
+    aspect-ratio: 3 / 4;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    margin-bottom: 8px;
+}
+
+.thumbnail {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.webtoon-card:hover .thumbnail {
+    transform: scale(1.05);
+}
+
+.info .title {
+    font-size: 14px;
+    font-weight: 700;
+    margin-bottom: 4px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.info .author {
+    font-size: 12px;
+    color: #888;
+}

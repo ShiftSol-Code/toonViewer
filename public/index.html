@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ToonViewer - Home</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700;900&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <div id="app-container" class="intro-container">
+        <header id="intro-header">
+            <h1>ToonViewer</h1>
+        </header>
+
+        <main id="intro-content">
+            <div class="webtoon-grid" id="webtoon-list">
+                <!-- Items will be injected here -->
+                <div class="loading-spinner">Loading...</div>
+            </div>
+        </main>
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const listContainer = document.getElementById('webtoon-list');
+            try {
+                const response = await fetch('/api/webtoons');
+                const data = await response.json();
+
+                listContainer.innerHTML = ''; // Clear loading
+
+                data.forEach(item => {
+                    const card = document.createElement('a');
+                    card.href = `/viewer?id=${item.id}`;
+                    card.className = 'webtoon-card';
+                    card.innerHTML = `
+                        <div class="thumbnail-container">
+                            <img src="${item.thumbnail}" alt="${item.title}" class="thumbnail" loading="lazy">
+                        </div>
+                        <div class="info">
+                            <h3 class="title">${item.title}</h3>
+                            <p class="author">${item.author}</p>
+                        </div>
+                    `;
+                    listContainer.appendChild(card);
+                });
+            } catch (error) {
+                console.error('Failed to load webtoons:', error);
+                listContainer.innerHTML = '<div style="text-align:center; padding:20px;">Failed to load data.</div>';
+            }
+        });
+    </script>
+</body>
+
+</html>
