@@ -7,28 +7,45 @@ const port = 3000;
 // Serve static files from the 'public' directory
 app.use(express.static(path.join(__dirname, 'public')));
 
-const { fetchWebtoonData } = require('./services/sheetService');
+const { fetchWebtoonData, getWebtoonEpisodes, getEpisode, getWebtoonList } = require('./services/sheetService');
 
 // API Endpoints
 app.get('/api/webtoons', async (req, res) => {
     const data = await fetchWebtoonData();
-    // Return list with minimal info
-    const list = data.map(item => ({
-        id: item.id,
-        title: item.title,
-        author: item.author,
-        thumbnail: item.thumbnail
-    }));
+    const list = getWebtoonList(data);
     res.json(list);
 });
 
-app.get('/api/webtoon/:id', async (req, res) => {
+// Get all episodes for a webtoon
+app.get('/api/webtoon/:id/episodes', async (req, res) => {
     const data = await fetchWebtoonData();
-    const item = data.find(w => w.id === req.params.id);
-    if (item) {
-        res.json(item);
+    const episodes = getWebtoonEpisodes(data, req.params.id);
+    if (episodes.length > 0) {
+        res.json(episodes);
     } else {
         res.status(404).json({ error: 'Webtoon not found' });
+    }
+});
+
+// Get specific episode with navigation info
+app.get('/api/webtoon/:id/episode/:episodeNum', async (req, res) => {
+    const data = await fetchWebtoonData();
+    const { id, episodeNum } = req.params;
+    const episode = getEpisode(data, id, episodeNum);
+    
+    if (episode) {
+        const allEpisodes = getWebtoonEpisodes(data, id);
+        const currentIndex = allEpisodes.findIndex(ep => ep.episode === episodeNum);
+        
+        res.json({
+            ...episode,
+            hasPrevious: currentIndex > 0,
+            hasNext: currentIndex < allEpisodes.length - 1,
+            previousEpisode: currentIndex > 0 ? allEpisodes[currentIndex - 1].episode : null,
+            nextEpisode: currentIndex < allEpisodes.length - 1 ? allEpisodes[currentIndex + 1].episode : null
+        });
+    } else {
+        res.status(404).json({ error: 'Episode not found' });
     }
 });
 

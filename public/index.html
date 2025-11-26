@@ -35,7 +35,7 @@
 
                 data.forEach(item => {
                     const card = document.createElement('a');
-                    card.href = `/viewer?id=${item.id}`;
+                    card.href = `/viewer?id=${item.id}&episode=1`;
                     card.className = 'webtoon-card';
                     card.innerHTML = `
                         <div class="thumbnail-container">
@@ -44,6 +44,7 @@
                         <div class="info">
                             <h3 class="title">${item.title}</h3>
                             <p class="author">${item.author}</p>
+                            ${item.episodeCount ? `<p class="episode-count">${item.episodeCount}화</p>` : ''}
                         </div>
                     `;
                     listContainer.appendChild(card);

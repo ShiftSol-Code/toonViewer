@@ -3,10 +3,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     const episodeTitle = document.getElementById('episode-title');
     const header = document.getElementById('viewer-header');
     const controls = document.getElementById('viewer-controls');
+    const prevBtn = document.querySelector('.nav-btn.prev');
+    const nextBtn = document.querySelector('.nav-btn.next');
     
-    // Get ID from URL
+    // Get ID and episode from URL
     const urlParams = new URLSearchParams(window.location.search);
     const webtoonId = urlParams.get('id');
+    const episodeNum = urlParams.get('episode') || '1'; // Default to episode 1
 
     if (!webtoonId) {
         alert('No webtoon ID provided');
@@ -15,20 +18,24 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     // Initialize
+    let currentEpisodeData = null;
+    
     try {
-        const response = await fetch(`/api/webtoon/${webtoonId}`);
-        if (!response.ok) throw new Error('Webtoon not found');
-        const data = await response.json();
-        loadEpisode(data);
+        const response = await fetch(`/api/webtoon/${webtoonId}/episode/${episodeNum}`);
+        if (!response.ok) throw new Error('Episode not found');
+        currentEpisodeData = await response.json();
+        loadEpisode(currentEpisodeData);
+        updateNavigationButtons(currentEpisodeData);
     } catch (error) {
         console.error(error);
         viewerContent.innerHTML = '<div style="text-align:center; padding:20px;">Failed to load episode.</div>';
     }
 
     setupInteractions();
+    setupNavigationButtons();
 
     function loadEpisode(data) {
-        episodeTitle.textContent = data.title;
+        episodeTitle.textContent = `${data.title} - ${data.episodeTitle}`;
         viewerContent.innerHTML = ''; // Clear loading
 
         // Parse comma-separated images if string, else assume array
@@ -36,11 +43,48 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         images.forEach((src, index) => {
             const img = document.createElement('img');
-            img.src = src.trim();
+            // Trim whitespace and quotes from image URL
+            img.src = src.trim().replace(/^["']|["']$/g, '');
             img.alt = `Page ${index + 1}`;
             img.className = 'webtoon-image';
             img.loading = 'lazy'; // Native lazy loading
             viewerContent.appendChild(img);
+        });
+        
+        // Scroll to top when new episode loads
+        viewerContent.scrollTop = 0;
+    }
+
+    function updateNavigationButtons(data) {
+        // Update button states
+        if (data.hasPrevious) {
+            prevBtn.disabled = false;
+            prevBtn.classList.remove('disabled');
+        } else {
+            prevBtn.disabled = true;
+            prevBtn.classList.add('disabled');
+        }
+
+        if (data.hasNext) {
+            nextBtn.disabled = false;
+            nextBtn.classList.remove('disabled');
+        } else {
+            nextBtn.disabled = true;
+            nextBtn.classList.add('disabled');
+        }
+    }
+
+    function setupNavigationButtons() {
+        prevBtn.addEventListener('click', () => {
+            if (currentEpisodeData && currentEpisodeData.hasPrevious) {
+                window.location.href = `/viewer?id=${webtoonId}&episode=${currentEpisodeData.previousEpisode}`;
+            }
+        });
+
+        nextBtn.addEventListener('click', () => {
+            if (currentEpisodeData && currentEpisodeData.hasNext) {
+                window.location.href = `/viewer?id=${webtoonId}&episode=${currentEpisodeData.nextEpisode}`;
+            }
         });
     }
 
